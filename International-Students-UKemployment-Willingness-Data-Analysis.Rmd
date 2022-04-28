@@ -1,0 +1,43 @@
+---
+title: "Analysis for international students employment willingness in UK"
+author: "Zhihao Ye"
+date: "2022/4/28"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(dplyr)
+library(readr)
+
+sati_levels <- c("0","1","2","3","4","5","6","7","8","9","10")
+
+rank_levels <- c("1","2","3","4","5")
+
+d_ISEW <- read_csv(
+  '../Data/ISEW_UK_Data.csv',
+  col_types = cols(
+    col_factor(),
+    col_factor(),
+    col_factor(),
+    col_factor(),
+    col_factor(),
+    col_factor(),
+    col_factor(ordered = TRUE, levels = sati_levels),
+    col_factor(ordered = TRUE, levels = sati_levels),
+    col_factor(ordered = TRUE, levels = sati_levels),
+    col_factor(ordered = TRUE, levels = sati_levels),
+    col_factor(ordered = TRUE, levels = sati_levels),
+    col_factor(ordered = TRUE, levels = sati_levels),
+    col_factor(ordered = TRUE, levels = sati_levels),
+    col_factor(ordered = TRUE, levels = sati_levels),
+    col_factor(ordered = TRUE, levels = rank_levels),
+    col_factor(ordered = TRUE, levels = rank_levels),
+    col_factor(ordered = TRUE, levels = rank_levels),
+    col_factor(ordered = TRUE, levels = rank_levels),
+    col_factor(ordered = TRUE, levels = rank_levels)
+    
+  ))
+```
+
