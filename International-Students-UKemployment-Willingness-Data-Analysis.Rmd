@@ -135,3 +135,52 @@ d_ISEW_rank_summary %>%
   ylim(1,5)
 
 ```
+
+
+# summarise, Chisq test, and fisher test
+```{r}
+d_ISEW <- d_ISEW %>%
+  mutate(
+    Female = gender == 'Female',
+    Visa_implication = visaafwiswuk > 5
+  )
+
+d_ISEW %>%
+  group_by(Female) %>%
+  summarise(
+    n = n(),
+    Agree = sum(Visa_implication)
+  ) %>%
+  mutate(
+    Percentage = round(Agree / n * 100)
+  )
+
+chisq.test(
+  x = d_ISEW$Female,
+  y = d_ISEW$Visa_implication
+)
+
+fisher.test(
+  x = d_ISEW$Female,
+  y = d_ISEW$Visa_implication
+)
+```
+
+# wilcoxon test
+```{r}
+d_ISEW %>% 
+  wilcox.test(
+    visaafwiswuk ~ Female,
+    data = .
+  )
+```
+
+# t-test
+```{r}
+d_ISEW %>%
+  t.test(
+    Female ~ Visa_implication,
+    var.equal = FALSE,
+    data = .
+  )
+```
