@@ -10,9 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 library(dplyr)
 library(readr)
-install.packages("ggplot2")
 library(ggplot2)
-
 
 
 sati_levels <- c("0","1","2","3","4","5","6","7","8","9","10")
@@ -43,15 +41,20 @@ d_ISEW <- read_csv(
     col_factor(ordered = TRUE, levels = rank_levels)
     
   ))
-```
 
+d_ISEW <- d_ISEW %>%
+  mutate(
+    across(
+      .cols = c(ends_with('diff'),ends_with('sati'),ends_with('swuk'),ends_with('rank')),
+      .fns = as.numeric
+    )
+  )
+```
 
 # Demographic characteristics of the sample
 ```{r}
 d_ISEW %>%
   count(gender)
-
-
 
 d_ISEW %>%
   count(edubg)
@@ -77,4 +80,58 @@ d_ISEW %>%
   ggplot(aes(x = gender))+
   geom_bar()
 ```
+  
+# Descriptive statistics
+```{r}
+ISEW_visa_summary <- d_ISEW %>%
+  select(ends_with('diff'),ends_with('sati')) %>%
+  lapply(
+    median
+    )
 
+d_ISEW_visa_summary <- tibble(
+  Variables = ISEW_visa_summary %>% names,
+  Median = ISEW_visa_summary %>% unlist
+)
+
+d_ISEW_visa_summary %>%
+  ggplot(
+    aes(x = Variables, y = Median))+
+  geom_point()+
+  ylim(0,10)
+
+ISEW_swuk_summary <- d_ISEW %>%
+  select(ends_with('swuk')) %>%
+  lapply(
+    median
+    )
+
+d_ISEW_swuk_summary <- tibble(
+  Variables = ISEW_swuk_summary %>% names,
+  Median = ISEW_swuk_summary %>% unlist
+)
+
+d_ISEW_swuk_summary %>%
+  ggplot(
+    aes(x = Variables, y = Median))+
+  geom_point()+
+  ylim(0,10)
+
+ISEW_rank_summary <- d_ISEW %>%
+  select(ends_with('rank')) %>%
+  lapply(
+    median
+    )
+
+d_ISEW_rank_summary <- tibble(
+  Variables = ISEW_rank_summary %>% names,
+  Median = ISEW_rank_summary %>% unlist
+)
+
+d_ISEW_rank_summary %>%
+  ggplot(
+    aes(x = Variables, y = Median))+
+  geom_point()+
+  ylim(1,5)
+
+```
