@@ -10,6 +10,10 @@ knitr::opts_chunk$set(echo = TRUE)
 
 library(dplyr)
 library(readr)
+install.packages("ggplot2")
+library(ggplot2)
+
+
 
 sati_levels <- c("0","1","2","3","4","5","6","7","8","9","10")
 
@@ -39,5 +43,38 @@ d_ISEW <- read_csv(
     col_factor(ordered = TRUE, levels = rank_levels)
     
   ))
+```
+
+
+# Demographic characteristics of the sample
+```{r}
+d_ISEW %>%
+  count(gender)
+
+
+
+d_ISEW %>%
+  count(edubg)
+
+d_ISEW %>%
+  count(oricoun)
+
+d_ISEW %>%
+  count(counwtw)
+
+d_ISEW %>%
+  count(family_attitudes)
+
+d_ISEW %>%
+  ggplot(aes(x = homesickness))+
+  geom_bar()
+
+d_ISEW %>%
+  ggplot(aes(x = family_attitudes))+
+  geom_bar()
+  
+d_ISEW %>%
+  ggplot(aes(x = gender))+
+  geom_bar()
 ```
 
