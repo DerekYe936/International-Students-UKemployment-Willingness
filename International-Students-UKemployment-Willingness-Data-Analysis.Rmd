@@ -78,20 +78,25 @@ key_list <- list(
     '-pswsati_coded',
     'skwdiff_coded',
     '-skwsati_coded',
-    'visaafwiswuk_coded'
+    'visaafwiswuk_coded',
+    'pswrank',
+    'skwrank'
   ),
   fa_attitudes = c(
     'family_attitudes_coded',
-    'faafwiswuk_coded'
+    'faafwiswuk_coded',
+    'farank'
     
   ),
   cd_attitudes = c(
-    'cdafwiswuk_coded'
+    'cdafwiswuk_coded',
+    'cdrank'
     
   ),
   hs_attitudes = c(
     'homesickness_coded',
-    'hsafwiswuk_coded'
+    'hsafwiswuk_coded',
+    'hsrank'
   )
 )
 
