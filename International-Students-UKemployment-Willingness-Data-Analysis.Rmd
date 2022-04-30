@@ -13,7 +13,8 @@ library(readr)
 library(ggplot2)
 library(knitr)
 library(psych)
-
+library(ltm)
+library(MASS)
 
 counwtw_levels <- c(
   'Back to your home country',
@@ -71,6 +72,7 @@ d_ISEW <- d_ISEW %>%
     )
   )
 
+d_ISEW_reliability <- cronbach.alpha(d_ISEW)
 
 key_list <- list(
   visa_attitudes = c(
@@ -100,13 +102,6 @@ key_list <- list(
   )
 )
 
-scoreItems(
-  keys = key_list,
-  items = d_ISEW,
-  totals = FALSE,
-  missing = TRUE,
-  impute = 'none'
-)
 
 d_ISEW_score <- scoreItems(
   keys = key_list,
@@ -117,6 +112,8 @@ d_ISEW_score <- scoreItems(
 )
 
 d_ISEW <- cbind(d_ISEW, d_ISEW_score$scores)
+
+
 
 ```
 
@@ -152,12 +149,12 @@ d_ISEW %>%
   
 # Descriptive statistics
 ```{r}
-ISEW_visa_summary <- d_ISEW %>%
-  select(ends_with('diff_coded'),ends_with('sati_coded')) %>%
+ISEW_visa_summary <- d_ISEW %>% 
+  select(ends_with('diff_coded'), ends_with('sati_coded')) %>%
   lapply(
     mean
-    )
-
+  )
+         
 d_ISEW_visa_summary <- tibble(
   Variables = ISEW_visa_summary %>% names,
   Mean = ISEW_visa_summary %>% unlist
