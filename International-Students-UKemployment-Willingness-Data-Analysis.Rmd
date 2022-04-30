@@ -11,11 +11,31 @@ knitr::opts_chunk$set(echo = TRUE)
 library(dplyr)
 library(readr)
 library(ggplot2)
+library(knitr)
+library(psych)
 
+
+counwtw_levels <- c(
+  'Back to your home country',
+  'Go to other foreign countries',
+  'Stay in United Kingdom'
+)
+
+fa_levels <- c(
+  'Support',
+  'Neither support nor oppose',
+  'Oppose'
+)
+
+hs_levels <- c(
+  'No',
+  'Maybe',
+  'Yes'
+)
 
 sati_levels <- c("0","1","2","3","4","5","6","7","8","9","10")
 
-rank_levels <- c("1","2","3","4","5")
+rank_levels <- c("5","4","3","2","1")
 
 d_ISEW <- read_csv(
   '../Data/ISEW_UK_Data.csv',
@@ -23,9 +43,9 @@ d_ISEW <- read_csv(
     col_factor(),
     col_factor(),
     col_factor(),
-    col_factor(),
-    col_factor(),
-    col_factor(),
+    col_factor(ordered = TRUE, levels = counwtw_levels),
+    col_factor(ordered = TRUE, levels = fa_levels),
+    col_factor(ordered = TRUE, levels = hs_levels),
     col_factor(ordered = TRUE, levels = sati_levels),
     col_factor(ordered = TRUE, levels = sati_levels),
     col_factor(ordered = TRUE, levels = sati_levels),
@@ -45,10 +65,54 @@ d_ISEW <- read_csv(
 d_ISEW <- d_ISEW %>%
   mutate(
     across(
-      .cols = c(ends_with('diff'),ends_with('sati'),ends_with('swuk'),ends_with('rank')),
-      .fns = as.numeric
+      .cols = c('counwtw','family_attitudes','homesickness',ends_with('diff'),ends_with('sati'),ends_with('swuk'),ends_with('rank')),
+      .fns = as.numeric,
+      .names = '{.col}_coded'
     )
   )
+
+
+key_list <- list(
+  visa_attitudes = c(
+    'pswdiff_coded',
+    '-pswsati_coded',
+    'skwdiff_coded',
+    '-skwsati_coded',
+    'visaafwiswuk_coded'
+  ),
+  fa_attitudes = c(
+    'family_attitudes_coded',
+    'faafwiswuk_coded'
+    
+  ),
+  cd_attitudes = c(
+    'cdafwiswuk_coded'
+    
+  ),
+  hs_attitudes = c(
+    'homesickness_coded',
+    'hsafwiswuk_coded'
+  )
+)
+
+scoreItems(
+  keys = key_list,
+  items = d_ISEW,
+  totals = FALSE,
+  missing = TRUE,
+  impute = 'none'
+)
+
+d_ISEW_score <- scoreItems(
+  keys = key_list,
+  items = d_ISEW,
+  totals = FALSE,
+  missing = TRUE,
+  impute = 'none'
+)
+
+d_ISEW <- cbind(d_ISEW, d_ISEW_score$scores)
+
 ```
 
 # Demographic characteristics of the sample
@@ -84,103 +148,238 @@ d_ISEW %>%
 # Descriptive statistics
 ```{r}
 ISEW_visa_summary <- d_ISEW %>%
-  select(ends_with('diff'),ends_with('sati')) %>%
+  select(ends_with('diff_coded'),ends_with('sati_coded')) %>%
   lapply(
-    median
+    mean
     )
 
 d_ISEW_visa_summary <- tibble(
   Variables = ISEW_visa_summary %>% names,
-  Median = ISEW_visa_summary %>% unlist
+  Mean = ISEW_visa_summary %>% unlist
 )
 
 d_ISEW_visa_summary %>%
   ggplot(
-    aes(x = Variables, y = Median))+
+    aes(x = Variables, y = Mean))+
   geom_point()+
   ylim(0,10)
 
 ISEW_swuk_summary <- d_ISEW %>%
-  select(ends_with('swuk')) %>%
+  select(ends_with('swuk_coded')) %>%
   lapply(
-    median
+    mean
     )
 
 d_ISEW_swuk_summary <- tibble(
   Variables = ISEW_swuk_summary %>% names,
-  Median = ISEW_swuk_summary %>% unlist
+  Mean = ISEW_swuk_summary %>% unlist
 )
 
 d_ISEW_swuk_summary %>%
   ggplot(
-    aes(x = Variables, y = Median))+
+    aes(x = Variables, y = Mean))+
   geom_point()+
   ylim(0,10)
 
 ISEW_rank_summary <- d_ISEW %>%
-  select(ends_with('rank')) %>%
+  select(ends_with('rank_coded')) %>%
   lapply(
-    median
+    mean
     )
 
 d_ISEW_rank_summary <- tibble(
   Variables = ISEW_rank_summary %>% names,
-  Median = ISEW_rank_summary %>% unlist
+  Mean = ISEW_rank_summary %>% unlist
 )
 
 d_ISEW_rank_summary %>%
   ggplot(
-    aes(x = Variables, y = Median))+
+    aes(x = Variables, y = Mean))+
   geom_point()+
   ylim(1,5)
 
 ```
 
 
-# summarise, Chisq test, and fisher test
+# summarise
 ```{r}
 d_ISEW <- d_ISEW %>%
   mutate(
-    Female = gender == 'Female',
-    Visa_implication = visaafwiswuk > 5
+    Employment_willingness = counwtw_coded == 3,
+    Visa_implication = visaafwiswuk_coded > 5,
+    fa_implication = faafwiswuk_coded > 5,
+    cd_implication = cdafwiswuk_coded > 5,
+    hs_implication = hsafwiswuk_coded > 5
   )
 
 d_ISEW %>%
-  group_by(Female) %>%
+  group_by(Employment_willingness) %>%
   summarise(
     n = n(),
-    Agree = sum(Visa_implication)
+    Visa_Agree = sum(Visa_implication)
   ) %>%
   mutate(
-    Percentage = round(Agree / n * 100)
+    Percentage = round(Visa_Agree / n * 100)
   )
 
+d_ISEW %>%
+  group_by(Employment_willingness) %>%
+  summarise(
+    n = n(),
+    Family_support = sum(fa_implication)
+  ) %>%
+  mutate(
+    Percentage = round(Family_support / n * 100)
+  )
+
+d_ISEW %>%
+  group_by(Employment_willingness) %>%
+  summarise(
+    n = n(),
+    Cultural_difference = sum(cd_implication)
+  ) %>%
+  mutate(
+    Percentage = round(Cultural_difference / n * 100)
+  )
+
+d_ISEW %>%
+  group_by(Employment_willingness) %>%
+  summarise(
+    n = n(),
+    Homesickness = sum(hs_implication)
+  ) %>%
+  mutate(
+    Percentage = round(Homesickness / n * 100)
+  )
+```
+
+# chisq test
+```{r}
 chisq.test(
-  x = d_ISEW$Female,
+  x = d_ISEW$Employment_willingness,
+  y = d_ISEW$Visa_implication
+)
+
+chisq.test(
+  x = d_ISEW$Employment_willingness,
+  y = d_ISEW$fa_implication
+)
+
+chisq.test(
+  x = d_ISEW$Employment_willingness,
+  y = d_ISEW$cd_implication
+)
+
+chisq.test(
+  x = d_ISEW$Employment_willingness,
+  y = d_ISEW$hs_implication
+)
+```
+
+# fisher test
+```{r}
+fisher.test(
+  x = d_ISEW$Employment_willingness,
   y = d_ISEW$Visa_implication
 )
 
 fisher.test(
-  x = d_ISEW$Female,
-  y = d_ISEW$Visa_implication
+  x = d_ISEW$Employment_willingness,
+  y = d_ISEW$fa_implication
+)
+
+fisher.test(
+  x = d_ISEW$Employment_willingness,
+  y = d_ISEW$cd_implication
+)
+
+fisher.test(
+  x = d_ISEW$Employment_willingness,
+  y = d_ISEW$hs_implication
 )
 ```
 
 # wilcoxon test
-```{r}
-d_ISEW %>% 
+```
+ d_ISEW %>% 
   wilcox.test(
     visaafwiswuk ~ Female,
     data = .
-  )
+    )
 ```
 
 # t-test
 ```{r}
 d_ISEW %>%
   t.test(
-    Female ~ Visa_implication,
+    visa_attitudes ~ Employment_willingness,
     var.equal = FALSE,
     data = .
   )
+
+d_ISEW %>%
+  t.test(
+    fa_attitudes ~ Employment_willingness,
+    var.equal = FALSE,
+    data = .
+  )
+
+d_ISEW %>%
+  t.test(
+    cd_attitudes ~ Employment_willingness,
+    var.equal = FALSE,
+    data = .
+  )
+
+d_ISEW %>%
+  t.test(
+    hs_attitudes ~ Employment_willingness,
+    var.equal = FALSE,
+    data = .
+  )
+```
+
+# linear regression
+```{r}
+d_ISEW %>%
+  
+  cor.test(~visa_attitudes + counwtw_coded, data = .)
+
+d_ISEW %>%
+  mutate(Employment_willingness = Employment_willingness %>% as.numeric)%>%
+  cor.test(~fa_attitudes + Employment_willingness, data = .)
+
+d_ISEW %>%
+  mutate(Employment_willingness = Employment_willingness %>% as.numeric)%>%
+  cor.test(~cd_attitudes + Employment_willingness, data = .)
+
+d_ISEW %>%
+  mutate(Employment_willingness = Employment_willingness %>% as.numeric)%>%
+  cor.test(~hs_attitudes + Employment_willingness, data = .)
+```
+
+```{r}
+d_ISEW %>% mutate(Employment_willingness = Employment_willingness %>% as.numeric) %>%
+  lm(Employment_willingness ~ visaafwiswuk_coded, data = .) %>%
+  summary
+
+d_ISEW %>% mutate(Employment_willingness = Employment_willingness %>% as.numeric) %>%
+  lm(Employment_willingness ~ faafwiswuk_coded, data = .) %>%
+  summary
+
+d_ISEW %>% mutate(Employment_willingness = Employment_willingness %>% as.numeric) %>%
+  lm(Employment_willingness ~ cd_attitudes, data = .) %>%
+  summary
+
+d_ISEW %>% mutate(Employment_willingness = Employment_willingness %>% as.numeric) %>%
+  lm(Employment_willingness ~ hs_attitudes, data = .) %>%
+  summary
+
+d_ISEW %>% mutate(Employment_willingness = Employment_willingness %>% as.numeric) %>%
+  lm(Employment_willingness ~ visaafwiswuk_coded + faafwiswuk_coded + cdafwiswuk_coded + hsafwiswuk_coded, data = .) %>%
+  summary
+
+d_ISEW %>% mutate(Employment_willingness = Employment_willingness %>% as.numeric) %>%
+  lm(Employment_willingness ~ visa_attitudes + fa_attitudes + cd_attitudes + hs_attitudes, data = .) %>%
+  summary
 ```
