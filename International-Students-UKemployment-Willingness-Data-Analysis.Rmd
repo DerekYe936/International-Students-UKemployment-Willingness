@@ -23,9 +23,9 @@ counwtw_levels <- c(
 )
 
 fa_levels <- c(
-  'Support',
+  'Oppose',
   'Neither support nor oppose',
-  'Oppose'
+  'Support'
 )
 
 hs_levels <- c(
