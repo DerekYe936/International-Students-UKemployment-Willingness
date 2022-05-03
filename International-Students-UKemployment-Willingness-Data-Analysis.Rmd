@@ -99,6 +99,10 @@ key_list <- list(
     'homesickness_coded',
     'hsafwiswuk_coded',
     'hsrank'
+  ),
+  visarank_coded = c(
+    'pswrank_coded',
+    'skwrank_coded'
   )
 )
 
@@ -196,11 +200,11 @@ d_ISEW_swuk_summary %>%
   ylim(0,10)
 
 ISEW_rank_mean_summary <- d_ISEW %>%
-  select(ends_with('rank_coded')) %>%
+  select('farank_coded', 'cdrank_coded', 'hsrank_coded', 'visarank_coded') %>%
   lapply(mean)
 
 ISEW_rank_sd_summary <- d_ISEW %>%
-  select(ends_with('rank_coded')) %>%
+  select('farank_coded', 'cdrank_coded', 'hsrank_coded', 'visarank_coded') %>%
   lapply(sd)
 
 tibble(
