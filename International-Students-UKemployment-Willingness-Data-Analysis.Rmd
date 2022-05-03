@@ -14,7 +14,7 @@ library(ggplot2)
 library(knitr)
 library(psych)
 library(ltm)
-library(MASS)
+
 
 counwtw_levels <- c(
   'Back to your home country',
@@ -152,21 +152,12 @@ d_ISEW %>%
 d_ISEW %>%
   ggplot(aes(x = gender))+
   geom_bar()
-
-d_ISEW %>%
-  count(visaafwiswuk_coded)%>%
-  mutate(
-    Percentage = round(n/63*100)
-  ) %>%
-  lapply(
-    mean
-    )
 ```
   
 # Descriptive statistics
 ```{r}
 ISEW_visa_summary <- d_ISEW %>% 
-  select(ends_with('diff_coded'), ends_with('sati_coded')) %>%
+  dplyr::select(ends_with('diff_coded'), ends_with('sati_coded')) %>%
   lapply(
     mean
   )
@@ -183,7 +174,7 @@ d_ISEW_visa_summary %>%
   ylim(0,10)
 
 ISEW_swuk_summary <- d_ISEW %>%
-  select(ends_with('swuk_coded')) %>%
+  dplyr::select(ends_with('swuk_coded')) %>%
   lapply(
     mean
     )
@@ -200,29 +191,31 @@ d_ISEW_swuk_summary %>%
   ylim(0,10)
 
 ISEW_rank_mean_summary <- d_ISEW %>%
-  select('farank_coded', 'cdrank_coded', 'hsrank_coded', 'visarank_coded') %>%
+  dplyr::select('farank_coded', 'cdrank_coded', 'hsrank_coded', 'visarank_coded') %>%
   lapply(mean)
 
 ISEW_rank_sd_summary <- d_ISEW %>%
-  select('farank_coded', 'cdrank_coded', 'hsrank_coded', 'visarank_coded') %>%
+ dplyr::select('farank_coded', 'cdrank_coded', 'hsrank_coded', 'visarank_coded') %>%
   lapply(sd)
 
 tibble(
   Variables = ISEW_rank_mean_summary %>% names(),
+  N = 63,
   Mean = ISEW_rank_mean_summary %>% unlist,
   SD = ISEW_rank_sd_summary %>% unlist
 )
 
-d_ISEW_rank_summary <- tibble(
-  Variables = ISEW_rank_summary %>% names(),
-  Mean = ISEW_rank_summary %>% unlist
-)
+#d_ISEW_rank_summary <- tibble(
+  #Variables = ISEW_rank_summary %>% names(),
+ # Mean = ISEW_rank_summary %>% unlist
+#)
 
-d_ISEW_rank_summary %>%
-  ggplot(
-    aes(x = Variables, y = Mean))+
-  geom_point()+
-  ylim(1,5)
+
+#d_ISEW_rank_summary %>%
+ # ggplot(
+  #  aes(x = Variables, y = Mean))+
+  #geom_point()+
+  #ylim(1,5)
 
 ```
 
